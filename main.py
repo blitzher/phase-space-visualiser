@@ -1,12 +1,7 @@
 import pygame as pg, numpy as np
-import pygame
-sh, sw = (500, 500)
-white = (255, 255, 255)
-black = (0, 0, 0)
-pygame.draw.line
-screen = pg.display.set_mode((sh, sw))
-running = True
-           
+from tools import opts, clrs
+from plot import plot
+       
 #                   ..      .........   .u*"^" "^Rc         
 #                 oP""*Lo*#"""""""""""7d" .d*N.    $         
 #                @  u@""           .u*" o*"   #L    ?b        
@@ -21,60 +16,53 @@ running = True
 #     ?L$. '"""***Nc    x@""   @"         d" JP             
 #       @'          "b.'$.   @"         $" 8"               
 #                    @L    $"         d" 8\                 
-#                    $$u.u$"         dF dF      tony        
+#                    $$u.u$"         dF dF              
 #                    $ """   o      dP xR                   
 #                    $      dFNu...@"  $                    
-#                    "N..   ?B ^"""   :R                    
+#                    "N..   ?B ^"""   :R        tony        
 #                      """"* RL       d>                    
 #                              ^"*bo@"                     
 
 
-pg.init()
 
-def normalize(array):
-    vector_length = np.linalg.norm(array)
-    return array / vector_length
-1
-def axis(screen):
-    pg.draw.line(screen, black, (0, sh/2), (sw, sh/2))
-    pg.draw.line(screen, black, (sw/2, 0), (sw/2, sh))
+
 
 " y = e^x -> y' = c*e^x - x - 1 "
 " y' = x + y "
 
 def dfun(x,y):
-    return (y)*5/500
-
-
-def draw_func(screen, fun):
-    pass
-
-def draw_field(screen, fun):
-    n = 20
-    for x in range(0, sw, int(sw/n)):
-        for y in range(0, sh, int(sh/n)):
-
-            vector_length = max(sw, sh)/(2*n)
-
-            slope_vector = normalize((1, -fun(x-sw/2,-y+sw/2) ))
-
-            start_point = np.array((x, y))  - slope_vector * vector_length / 2
-            end_point =   np.array((x, y))  + slope_vector * vector_length / 2
-
-            pg.draw.aaline(screen, black, start_point, end_point, 2)
-
-
-while running:
-    screen.fill(white)
+    return x+y
 
 
 
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
 
-    axis(screen)
-    draw_field(screen, dfun)
 
-    pg.display.flip()
-    pass
+
+
+
+def main():
+    running = True
+    pg.init()
+    pg.display.set_mode((opts['sw'], opts['sh']))
+    plt = plot( (-1, 1), (-1, 1) )
+
+    while running:
+        plt.screen.fill(clrs['white'])
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            plt.handle(event)
+
+        plt.show()    
+        plt.draw_field(dfun, n=10)
+
+        for c in np.linspace(-4, 4, num = 9):
+            plt.draw_func(lambda x: c*np.exp(x) - x - 1)
+
+        plt.border()
+        pg.display.flip()
+    plt.save()
+
+if __name__ == '__main__':
+    main()
