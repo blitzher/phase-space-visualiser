@@ -57,8 +57,8 @@ def main():
         plt.show()    
         plt.draw_field(dfun, n=10)
 
-        for c in np.linspace(-4, 4, num = 9):
-            plt.draw_func(lambda x: c*np.exp(x) - x - 1)
+        plt.draw_func(lambda x: 2 * np.exp(x) - x - 1)
+        plt.draw_case(dfun, x0=0, y0=0.5, n=100)
 
         plt.border()
         pg.display.flip()

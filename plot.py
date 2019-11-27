@@ -32,8 +32,8 @@ class plot:
         """
         x,y = cordinp(*cords)
 
-        x = scale(x, self.lo_x, self.hi_x, 0, opts['sw'])
-        y = scale(y, self.hi_y, self.lo_y, 0, opts['sh']) # invert y axis
+        x = scale(x, self.lo_x, self.hi_x, opts['bw'], opts['sw'] - opts['bw'])
+        y = scale(y, self.hi_y, self.lo_y, opts['bw'], opts['sh'] - opts['bw']) # invert y axis
 
         return np.array( (int(x),int(y)) )
 
@@ -63,9 +63,35 @@ class plot:
     def draw_grid(self):
         pass
 
+    def draw_case(self, df, x0=0, y0=0, n = 20):
+
+        def case(x):
+            xs = []
+            ys = []
+
+            xspace = np.linspace(x0, x, num = n)
+            h = xspace[1]-xspace[0]
+
+            for c,dx in enumerate(np.linspace(x0, x, num = n)):
+                if c == 0:
+                    xs.append(x0)
+                    ys.append(y0)
+                    continue
+
+                xs.append(dx)
+                dy = ys[c-1] + df(xs[c-1], ys[c-1]) * h
+                ys.append(dy)
+            return ys[-1]
+
+
+        #case = lambda x: y0 + sum(( df(np.linspace(x0, x, num = n), np.linspace(y0, x, num=n)) ) )
+        line = [ self.to_screen(x, case(x)) for x in np.linspace(self.lo_x, self.hi_x, num = n)]
+        pgdraw.aalines(self.screen, clrs['red'], False, line)
+
+
     def draw_func(self, fun, n = 20):
         line = [ self.to_screen(x, fun(x)) for x in np.linspace(self.lo_x, self.hi_x, num = n)]
-        pgdraw.aalines(self.screen, clrs['black'], False, line)
+        pgdraw.aalines(self.screen, clrs['blue'], False, line)
 
     def draw_field(self, fun, n = 20):
 
@@ -83,14 +109,13 @@ class plot:
 
                 pgdraw.line(self.screen, clrs['black'], self.to_screen(start_point), self.to_screen(end_point))
 
-    def border(self):
-        w = 15
+    def border(self, w = opts['bw']):
         # draw beige borders
-        pgdraw.rect(self.screen, clrs['beige'], rect((0,0), (w, opts['sh']) )   )             # left square
-        pgdraw.rect(self.screen, clrs['beige'], rect((opts['sw']-w, 0), (w, opts['sh']) )   ) # right square
+        pgdraw.rect(self.screen, clrs['beige'], rect((0,0), (w, opts['sh']) )   )                # left square
+        pgdraw.rect(self.screen, clrs['beige'], rect((opts['sw']-w, 0), (w, opts['sh']) )   )    # right square
 
-        pgdraw.rect(self.screen, clrs['beige'], rect((0, 0), (opts['sw'], w) )   )            # top square
-        pgdraw.rect(self.screen, clrs['beige'], rect((0, opts['sh']-w), (opts['sw'], w) )   ) # bottom square
+        pgdraw.rect(self.screen, clrs['beige'], rect((0, 0), (opts['sw'], w) )   )               # top square
+        pgdraw.rect(self.screen, clrs['beige'], rect((0, opts['sh']-w), (opts['sw'], w) )   )    # bottom square
 
         # draw dark outline
         pgdraw.line(self.screen, clrs['dgrey'], (w, w), (w, opts['sh']-w))                       # left border
@@ -116,8 +141,6 @@ class plot:
         #     self.hi_x -= 1
         #     self.lo_y += 1
         #     self.hi_x -= 1
-
-        print(event)
 
         if self.dragging and hasattr(event, 'rel'):
             dx, dy = - np.array(event.rel) * 1 / 25

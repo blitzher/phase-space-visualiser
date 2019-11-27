@@ -40,12 +40,17 @@ def normalize(array):
 
 opts = {        # global options
     'sh' : 500, # screen height
-    'sw' : 500  # screen width
+    'sw' : 500, # screen width
+    'bw' : 10   # border width
 }
 
 clrs = {        # colours used 
     'white' : [255, 255, 255],
     'dgrey' : [50 , 50 , 50 ],
     'black' : [0  , 0  , 0  ],
-    'beige' : [245, 245, 220]
+    'beige' : [245, 245, 220],
+    'red'   : [255, 0  , 0  ],
+    'green' : [0  , 255, 0  ],
+    'blue'  : [0  , 0  , 255],
+    'yellow': [255, 255, 0  ]
 }
