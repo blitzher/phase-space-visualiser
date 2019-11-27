@@ -2,6 +2,7 @@ import numpy as np
 
 
 def _rnd(v):
+    " round a number to the nearest integer "
     return int(round(v, 0))
 
 def scale(val, a,b, c,d):
@@ -11,13 +12,11 @@ def scale(val, a,b, c,d):
     if a == b:
         raise ValueError('cannot scale value from empty area')
 
-    # if val < a: val = a
-    # if val > b: val = b
-
     scaled = c + (d-c)/(b-a) * (val-a)
     return scaled
 
 def cordinp(*args):
+    " unpacks cordinate input from tuple or seperate variables "
     if len(args) == 1:
         args = args[0]
     if len(args) != 2:
@@ -27,22 +26,24 @@ def cordinp(*args):
 
 
 def _norm(array):
+    " find the norm of an array "
     if type(array) != np.array:
         array = np.array(array)
     return np.sqrt(np.sum( array ** 2) )
 
 def normalize(array):
+    " normalize an array to have length 1 "
     if type(array) != np.array:
         array = np.array(array)
     vector_length = _norm(array)
     return array / vector_length
 
-opts = {
-    'sh' : 500,
-    'sw' : 500
+opts = {        # global options
+    'sh' : 500, # screen height
+    'sw' : 500  # screen width
 }
 
-clrs = {
+clrs = {        # colours used 
     'white' : [255, 255, 255],
     'dgrey' : [50 , 50 , 50 ],
     'black' : [0  , 0  , 0  ],
