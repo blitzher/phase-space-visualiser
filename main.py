@@ -32,7 +32,7 @@ from plot import plot
 
 " y' = e^(x-y)"
 def dfun(x,y):
-    return np.exp(x-y)
+    return x+y
 
 
 def main():
@@ -49,11 +49,11 @@ def main():
                 running = False
             plt.handle(event)
 
-        plt.show()                  # draw axis and grid
         plt.draw_field(dfun, n=30)
+        plt.show()                  # draw axis and grid
 
-        plt.draw_func(lambda x: np.log(1+np.exp(x)))
-        plt.draw_case(dfun, x0=0, y0=1, n=100)
+        #plt.draw_func(lambda x: np.log(1+np.exp(x)))
+        #plt.draw_case(dfun, x0=0, y0=-1, n=100)
 
         plt.border()
         pg.display.flip()

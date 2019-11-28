@@ -3,7 +3,7 @@ main class for the
 
 """
 from tools import *
-from pygame import display, draw as pgdraw, image as pgimage
+from pygame import display, draw as pgdraw, image as pgimage, font as pgfont
 from pygame.rect import Rect as rect
 import numpy as np
 
@@ -15,6 +15,8 @@ class plot:
 
         self.screen = display.get_surface()
 
+        self.axis_font = pgfont.SysFont('Cambria', 15, True)
+
         self.axis = axis
         self.grid = grid
         self.dragging = False
@@ -23,6 +25,12 @@ class plot:
         self.axis = True
     def hide_axis(self):
         self.axis = False
+
+    def center_text(self, msg, pos, font, colour = 'black'):
+        " display a message to the screen, centered at pos "
+        text_size = font.size(str(msg))
+        text_centered = (pos[0] - text_size[0] / 2, pos[1] - text_size[1] / 2)
+        self.screen.blit(font.render(str(msg), True, clrs[colour]), text_centered)
 
     def to_screen(self, *cords):
         """takes a world point (x,y) and translates it
@@ -51,17 +59,67 @@ class plot:
         return np.array((x,y))
 
     def draw_axis(self):
+
+        def limit(ar1, ar2, func):
+            " limit the values of ar1 by values of ar2 by func "
+            assert len(ar1) == len(ar2), " cannot limit arrays of different sizes"
+            for c in range(len(ar1)):
+                if not ar2[c]: continue
+                if func(ar1[c], ar2[c]):
+                    ar1[c] = ar2[c]
+            return ar1
+
+
         x_ax1 = self.to_screen(self.lo_x, 0)
         x_ax2 = self.to_screen(self.hi_x, 0)
 
+        x_ax1 = limit(x_ax1, (None, 50),              lambda x,y: x < y)
+        x_ax1 = limit(x_ax1, (None, opts['sh'] - 50), lambda x,y: x > y)
+        x_ax2 = limit(x_ax2, (None, 50),              lambda x,y: x < y)
+        x_ax2 = limit(x_ax2, (None, opts['sh'] - 50), lambda x,y: x > y)
+
         y_ax1 = self.to_screen(0, self.lo_y)
         y_ax2 = self.to_screen(0, self.hi_y)
+
+        y_ax1 = limit(y_ax1, (50, None),              lambda x,y: x < y)
+        y_ax1 = limit(y_ax1, (opts['sh'] - 50, None), lambda x,y: x > y)
+        y_ax2 = limit(y_ax2, (50, None),              lambda x,y: x < y)
+        y_ax2 = limit(y_ax2, (opts['sh'] - 50, None), lambda x,y: x > y)
+
+        for x in range(floor(self.lo_x), ceil(self.hi_x)):
+            pos = self.to_screen(x, 0)
+
+            pos = limit(pos, (None, 50),              lambda x,y: x < y)
+            pos = limit(pos, (None, opts['sh'] - 50), lambda x,y: x > y)
+
+            pos1, pos2 = (pos - np.array((0, 10))), (pos + np.array((0,10)))
+
+            pgdraw.line(self.screen, clrs['black'], pos1, pos2)
+            self.center_text(x, pos + np.array((10, -10)), self.axis_font)
+        
+        for y in range(floor(self.lo_y), ceil(self.hi_y)):
+            pos = self.to_screen(0, y)
+
+            pos = limit(pos, (50, None),              lambda x,y: x < y)
+            pos = limit(pos, (opts['sh'] - 50, None), lambda x,y: x > y)
+
+            pos1, pos2 = (pos - np.array((10, 0))), (pos + np.array((10, 0)))
+
+            pgdraw.line(self.screen, clrs['black'], pos1, pos2)
+            self.center_text(y, pos + np.array((10, -10)), self.axis_font)
 
         pgdraw.line(self.screen, clrs['black'], x_ax1, x_ax2)
         pgdraw.line(self.screen, clrs['black'], y_ax1, y_ax2)
 
     def draw_grid(self):
-        pass
+        for x in range(floor(self.lo_x), ceil(self.hi_x)):
+            bot, top = (x, self.lo_y), (x, self.hi_y)
+            pgdraw.line(self.screen, clrs['lgrey'], self.to_screen(bot), self.to_screen(top))
+
+        for y in range(floor(self.lo_y), ceil(self.hi_y)):
+            lft, rgt = (self.lo_x, y), (self.hi_x, y)
+            #print(lft, rgt)
+            pgdraw.line(self.screen, clrs['lgrey'], self.to_screen(lft), self.to_screen(rgt))
 
     def draw_case(self, df, x0=0, y0=0, n = 20):
 
@@ -155,10 +213,10 @@ class plot:
 
     def show(self):
 
-        if self.axis:
-            self.draw_axis()
         if self.grid:
             self.draw_grid()
+        if self.axis:
+            self.draw_axis()
 
     def save(self, filename = 'plot.png'):
         pgimage.save(self.screen, filename)

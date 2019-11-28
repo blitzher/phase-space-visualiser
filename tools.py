@@ -20,6 +20,18 @@ def scale(val, a,b, c,d):
     scaled = c + (d-c)/(b-a) * (val-a)
     return scaled
 
+def hex_to_rgb(hexs):
+    assert len(hexs) == 6, "could not convert '%s' to rgb" % hexs
+    hexv = (hexs[i*2:i*2+2] for i in range(int(len(hexs)/2)))
+    rgb = ( int('0x' + hx, 0) for hx in hexv )
+    return tuple(rgb)
+    
+
+def floor(val):
+    return int(val - (val % 1)) if int(val) != val else int(val)
+def ceil(val):
+    return int(val - (val % 1) + 1) if int(val) != val else int(val)
+
 def cordinp(*args):
     " unpacks cordinate input from tuple or seperate variables "
     if len(args) == 1:
@@ -50,8 +62,9 @@ opts = {        # global options
 }
 
 clrs = {        # colours used 
-    'white' : [255, 255, 255],
+    'white' : [248, 248, 255],
     'dgrey' : [50 , 50 , 50 ],
+    'lgrey' : [180, 180, 180],
     'black' : [0  , 0  , 0  ],
     'beige' : [245, 245, 220],
     'red'   : [255, 0  , 0  ],
