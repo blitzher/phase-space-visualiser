@@ -5,6 +5,11 @@ def _rnd(v):
     " round a number to the nearest integer "
     return int(round(v, 0))
 
+def int_interp(a, b, amount):
+    " interpolate a value between [a,b] by amount "
+    dist = b-a
+    return a + dist * amount
+
 def scale(val, a,b, c,d):
     "scale a value from area [a,b] to [c,d]"
     # if value is above or below [a,b], set it it to the respective limit

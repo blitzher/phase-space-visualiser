@@ -131,16 +131,16 @@ class plot:
         if event.type == 6 and event.button == 1:
             self.dragging = False
 
-        # if event.type == 5 and event.button == 5:
-        #     self.lo_x -= 1
-        #     self.hi_x += 1
-        #     self.lo_y -= 1
-        #     self.hi_x += 1
-        # if event.type == 5 and event.button == 4:
-        #     self.lo_x += 1
-        #     self.hi_x -= 1
-        #     self.lo_y += 1
-        #     self.hi_x -= 1
+        if event.type == 5 and event.button == 5:
+            self.lo_x = int_interp(self.lo_x, self.hi_x, -.25)
+            self.hi_x = int_interp(self.lo_x, self.hi_x, 1.25)
+            self.lo_y = int_interp(self.lo_y, self.hi_y, -.25)
+            self.hi_x = int_interp(self.lo_y, self.hi_y, 1.25)
+        if event.type == 5 and event.button == 4:
+            self.lo_x = int_interp(self.lo_x, self.hi_x,  .25)
+            self.hi_x = int_interp(self.lo_x, self.hi_x,  .75)
+            self.lo_y = int_interp(self.lo_y, self.hi_y,  .25)
+            self.hi_x = int_interp(self.lo_y, self.hi_y,  .75)
 
         if self.dragging and hasattr(event, 'rel'):
             dx, dy = - np.array(event.rel) * 1 / 25

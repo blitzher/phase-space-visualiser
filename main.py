@@ -28,23 +28,18 @@ from plot import plot
 
 
 " y = e^x -> y' = c*e^x - x - 1 "
-" y' = x + y "
 
+
+" y' = e^(x-y)"
 def dfun(x,y):
-    return x+y
-
-
-
-
-
-
+    return np.exp(x-y)
 
 
 def main():
     running = True
     pg.init()
     pg.display.set_mode((opts['sw'], opts['sh']))
-    plt = plot( (-1, 1), (-1, 1) )
+    plt = plot( (-3, 3), (-3, 3) )
 
     while running:
         plt.screen.fill(clrs['white'])
@@ -54,11 +49,11 @@ def main():
                 running = False
             plt.handle(event)
 
-        plt.show()    
-        plt.draw_field(dfun, n=10)
+        plt.show()                  # draw axis and grid
+        plt.draw_field(dfun, n=30)
 
-        plt.draw_func(lambda x: 2 * np.exp(x) - x - 1)
-        plt.draw_case(dfun, x0=0, y0=0.5, n=100)
+        plt.draw_func(lambda x: np.log(1+np.exp(x)))
+        plt.draw_case(dfun, x0=0, y0=1, n=100)
 
         plt.border()
         pg.display.flip()
