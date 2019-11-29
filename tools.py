@@ -58,7 +58,8 @@ def normalize(array):
 opts = {        # global options
     'sh' : 500, # screen height
     'sw' : 500, # screen width
-    'bw' : 10   # border width
+    'bw' : 10,  # border width
+    'aw' : 50   #  axis  width
 }
 
 clrs = {        # colours used 
