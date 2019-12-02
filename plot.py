@@ -54,6 +54,32 @@ class plot:
         text_centered = (pos[0] - text_size[0] / 2, pos[1] - text_size[1] / 2)
         self.screen.blit(font.render(str(msg), True, colour), text_centered)
 
+    def _draw_arrow(self, start, end, colour='black', width=1, rel_spoke_len=0.2):
+        """ internal function for drawing arrows"""
+        if colour in clrs.info:
+            colour = clrs[colour]
+        strt, endp = np.array(start), np.array(end)
+        diff = endp - strt
+        perp = tools.perp(tools.normalize(diff))
+
+        midpoint = strt + diff * 0.7
+
+        pnt2 = midpoint - (perp * tools.norm(diff) * rel_spoke_len)
+        pnt1 = midpoint + (perp * tools.norm(diff) * rel_spoke_len)
+
+        #pgdraw.line(self.screen, colour, pnt1, pnt2)
+
+        # draw the arrow
+        #print(strt, endp, pnt1, pnt2)
+        if width != 1:
+            pgdraw.line(self.screen, colour, strt, endp, width) # main line
+            pgdraw.line(self.screen, colour, pnt1, endp, width) # spoke one
+            pgdraw.line(self.screen, colour, pnt2, endp, width) # spoke two
+        else:
+            pgdraw.aaline(self.screen, colour, strt, endp, width) # main line
+            pgdraw.aaline(self.screen, colour, pnt1, endp, width) # spoke one
+            pgdraw.aaline(self.screen, colour, pnt2, endp, width) # spoke two
+
     def to_screen(self, *cords):
         """takes a world point (x,y) and translates it
         to screen coordinates, i.e. according to axis
@@ -65,7 +91,11 @@ class plot:
         x = tools.scale(x, self.lo_x, self.hi_x, opts.bw, opts.sw - opts.bw)
         y = tools.scale(y, self.hi_y, self.lo_y, opts.bw, opts.sh - opts.bw) # invert y axis
 
-        return np.array((int(x), int(y)))
+        #print(x,y)
+        try:
+            return np.array((int(x), int(y)))
+        except OverflowError:
+            return np.array((int(x), 1E10))
 
     def to_world(self, *cords):
         """takes a screen point (x,y) and translates it
@@ -80,7 +110,7 @@ class plot:
 
         return np.array((x, y))
 
-    def draw_axis(self):
+    def draw_axis(self, draw_x=True, draw_y=True):
         """ draw x and y axis, and keep them on screen always
         with a distance of opts.aw
 
@@ -96,47 +126,49 @@ class plot:
                     ar1[c] = ar2[c]
             return ar1
 
+        if draw_x:
+            x_ax1 = self.to_screen(self.lo_x, 0)
+            x_ax2 = self.to_screen(self.hi_x, 0)
 
-        x_ax1 = self.to_screen(self.lo_x, 0)
-        x_ax2 = self.to_screen(self.hi_x, 0)
+            x_ax1 = limit(x_ax1, (None, opts.aw), lambda x, y: x < y)
+            x_ax1 = limit(x_ax1, (None, opts.sh - opts.aw), lambda x, y: x > y)
+            x_ax2 = limit(x_ax2, (None, opts.aw), lambda x, y: x < y)
+            x_ax2 = limit(x_ax2, (None, opts.sh - opts.aw), lambda x, y: x > y)
 
-        x_ax1 = limit(x_ax1, (None, opts.aw), lambda x, y: x < y)
-        x_ax1 = limit(x_ax1, (None, opts.sh - opts.aw), lambda x, y: x > y)
-        x_ax2 = limit(x_ax2, (None, opts.aw), lambda x, y: x < y)
-        x_ax2 = limit(x_ax2, (None, opts.sh - opts.aw), lambda x, y: x > y)
+            pgdraw.line(self.screen, clrs['black'], x_ax1, x_ax2) # draw the axis
 
-        y_ax1 = self.to_screen(0, self.lo_y)
-        y_ax2 = self.to_screen(0, self.hi_y)
+            for x in range(tools.floor(self.lo_x), tools.ceil(self.hi_x)): # draw ticks
+                pos = self.to_screen(x, 0)
 
-        y_ax1 = limit(y_ax1, (opts.aw, None), lambda x, y: x < y)
-        y_ax1 = limit(y_ax1, (opts.sw - opts.aw, None), lambda x, y: x > y)
-        y_ax2 = limit(y_ax2, (opts.aw, None), lambda x, y: x < y)
-        y_ax2 = limit(y_ax2, (opts.sw - opts.aw, None), lambda x, y: x > y)
+                pos = limit(pos, (None, opts.aw), lambda x, y: x < y)
+                pos = limit(pos, (None, opts.sh - opts.aw), lambda x, y: x > y)
 
-        for x in range(tools.floor(self.lo_x), tools.ceil(self.hi_x)):
-            pos = self.to_screen(x, 0)
+                pos1, pos2 = (pos - np.array((0, 10))), (pos + np.array((0, 10)))
 
-            pos = limit(pos, (None, opts.aw), lambda x, y: x < y)
-            pos = limit(pos, (None, opts.sh - opts.aw), lambda x, y: x > y)
+                pgdraw.line(self.screen, clrs['black'], pos1, pos2)
+                self.center_text(x, pos + np.array((10, -10)), self.axis_font)
 
-            pos1, pos2 = (pos - np.array((0, 10))), (pos + np.array((0, 10)))
+        if draw_y:
+            y_ax1 = self.to_screen(0, self.lo_y)
+            y_ax2 = self.to_screen(0, self.hi_y)
 
-            pgdraw.line(self.screen, clrs['black'], pos1, pos2)
-            self.center_text(x, pos + np.array((10, -10)), self.axis_font)
+            y_ax1 = limit(y_ax1, (opts.aw, None), lambda x, y: x < y)
+            y_ax1 = limit(y_ax1, (opts.sw - opts.aw, None), lambda x, y: x > y)
+            y_ax2 = limit(y_ax2, (opts.aw, None), lambda x, y: x < y)
+            y_ax2 = limit(y_ax2, (opts.sw - opts.aw, None), lambda x, y: x > y)
 
-        for y in range(tools.floor(self.lo_y), tools.ceil(self.hi_y)):
-            pos = self.to_screen(0, y)
+            pgdraw.line(self.screen, clrs['black'], y_ax1, y_ax2) # draw axis
 
-            pos = limit(pos, (opts.aw, None), lambda x, y: x < y)
-            pos = limit(pos, (opts.sw - opts.aw, None), lambda x, y: x > y)
+            for y in range(tools.floor(self.lo_y), tools.ceil(self.hi_y)): # draw ticks
+                pos = self.to_screen(0, y)
 
-            pos1, pos2 = (pos - np.array((10, 0))), (pos + np.array((10, 0)))
+                pos = limit(pos, (opts.aw, None), lambda x, y: x < y)
+                pos = limit(pos, (opts.sw - opts.aw, None), lambda x, y: x > y)
 
-            pgdraw.line(self.screen, clrs['black'], pos1, pos2)
-            self.center_text(y, pos + np.array((10, -10)), self.axis_font)
+                pos1, pos2 = (pos - np.array((10, 0))), (pos + np.array((10, 0)))
 
-        pgdraw.line(self.screen, clrs['black'], x_ax1, x_ax2)
-        pgdraw.line(self.screen, clrs['black'], y_ax1, y_ax2)
+                pgdraw.line(self.screen, clrs['black'], pos1, pos2)
+                self.center_text(y, pos + np.array((15, -15)), self.axis_font)
 
     def draw_grid(self):
         """ draw a grid at each integer x and y value """
@@ -186,7 +218,6 @@ class plot:
             line = [self.to_screen(point) for point in cas]
             pgdraw.aalines(self.screen, colour, False, line)
 
-
     def draw_func(self, fun, n=20, colour='blue'):
         """ draw an arbitrary function with n line segments
         pass colour from tools.clrs or rgb value
@@ -220,7 +251,37 @@ class plot:
                 start_point = self.to_screen(x, y) - slope_vector * vector_length / 2
                 end_point = self.to_screen(x, y) + slope_vector * vector_length / 2
 
-                pgdraw.line(self.screen, colour, start_point, end_point)
+                self._draw_arrow(start_point, end_point)
+                #pgdraw.line(self.screen, colour, start_point, end_point)
+
+    def draw_pline(self, df, x=0, n=20, colour='black'):
+        """ draws the phaseline """
+
+        if colour in clrs.info:
+            colour = clrs[colour]
+
+        vector_length = max(opts.sw, opts.sh) / (2*n)
+
+
+        for y in np.linspace(self.lo_y, self.hi_y, num=n):
+            strt = (0, y)
+
+            if abs(df(x,y)) < 0.05:
+                continue
+            elif df(x,y) > 0:
+                head = np.array((0, 1))
+            else:
+                head = np.array((0, -1))
+
+            screen_strt = self.to_screen(strt)
+            screen_head = self.to_screen(strt + head)
+
+            screen_diff = screen_head - screen_strt
+            screen_endp = screen_strt + tools.normalize(screen_diff) * vector_length
+
+            #pgdraw.circle(self.screen, colour, strt, 10)
+            #pgdraw.line(self.screen, colour, strt, head)
+            self._draw_arrow(screen_strt, screen_endp, width=1, rel_spoke_len=0.5)
 
     def border(self, w=opts.bw, clr1='beige', clr2='dgrey'):
         """ draw the border of the window
@@ -282,7 +343,7 @@ class plot:
                 self.lo_y -= dy
                 self.hi_y -= dy
 
-    def show(self):
+    def show(self, x_axis=True, y_axis=True):
         """ show all of the pure plot objects
         including grid and axis, and upcoming legend
 
@@ -292,7 +353,10 @@ class plot:
         if self.grid:
             self.draw_grid()
         if self.axis:
-            self.draw_axis()
+            self.draw_axis(draw_x=x_axis, draw_y=y_axis)
+
+        pgdraw.circle(self.screen, (160,82,45), self.to_screen(0, 0), 10)
+        pgdraw.circle(self.screen, (160,82,45), self.to_screen(0, 1), 10)
 
     def save(self, filename='plot.png'):
         """ save an image of the plot using pygame.image.save

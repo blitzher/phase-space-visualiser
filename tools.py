@@ -33,6 +33,9 @@ def flip(array):
     " flip the y value of an array "
     return np.array((array[0], -array[1]))
 
+def perp(array):
+    " find the perpendicular of an array "
+    return np.array((array[1], -array[0]))
 
 def scale(val, a, b, c, d):
     "scale a value from area [a,b] to [c,d]"
@@ -67,22 +70,22 @@ def cordinp(*args):
     return args[0], args[1]
 
 
-def _norm(array):
+def norm(array):
     " find the norm of an array "
-    if not isinstance(array, np.array):
+    if not isinstance(array, np.ndarray):
         array = np.array(array)
     return np.sqrt(np.sum(array ** 2))
 
 def normalize(array):
     " normalize an array to have length 1 "
-    if not isinstance(array, np.array):
+    if not isinstance(array, np.ndarray):
         array = np.array(array)
-    vector_length = _norm(array)
+    vector_length = norm(array)
     return array / vector_length
 
 opts = Info({  # global options
-    'sh' : 720, # screen height
-    'sw' : 1280, # screen width
+    'sh' : 500, # screen height
+    'sw' : 100, # screen width
     'bw' : 10,  # border width
     'aw' : 50   #  axis  width
 })

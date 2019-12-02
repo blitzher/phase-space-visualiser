@@ -1,15 +1,13 @@
 " main module "
-from time import time as ctime
 import pygame as pg
-import numpy as np
 from tools import opts, clrs
 from plot import plot
+
 
 #                   ..      .........   .u*"^" "^Rc
 #                 oP""*Lo*#"""""""""""7d" .d*N.    $
 #                @  u@""           .u*" o*"   #L    ?b
-#              8  ^"                    £w*@me€      '"Nu
-#           .P                                          $r
+#             .8  ^"                    £w*@me€      '"Nu
 #         .@"                                  $L       $
 #    .d#"                                  .dP d"   .d#
 #   xP              .e                 .ud#"  dE.o@"(
@@ -27,15 +25,9 @@ from plot import plot
 #                              ^"*bo@"
 
 
-
-
-
-# y = e^x -> y' = c*e^x - x - 1 "
-# y' = e^(x-y)"
-
 def dfun(x, y):
     " differential equation to be graphed "
-    return np.cos(x) * np.sin(x) + 0*y
+    return y*(1-y)+0*x
 
 def fps(plt, last, curr):
     " draw the current frames per second to the screen "
@@ -46,10 +38,11 @@ def fps(plt, last, curr):
 def main():
     " main function "
     running = True
-    last = ctime()
     pg.init()
     pg.display.set_mode((opts['sw'], opts['sh']))
-    plt = plot((-3, 3), (-3, 3))
+    plt = plot((-10, 10), (-0.5, 1.6))
+
+    plt.grid = False
 
     while running:
         plt.screen.fill(clrs['white'])
@@ -59,15 +52,11 @@ def main():
                 running = False
             plt.handle(event)
 
-        #plt.draw_field(dfun, n=30)
-        plt.show()  # draw axis and grid
+        plt.show(x_axis=False)  # draw axis and grid
 
-        plt.draw_func(lambda x: x**2 + 1, n=100)
-        plt.draw_case(dfun, x0=0, y0=0, n=100)
+        plt.draw_pline(dfun, x=1, n = 5)
 
         plt.border()
-        fps(plt, last, ctime())
-        last = ctime()
         pg.display.flip()
     plt.save()
 
