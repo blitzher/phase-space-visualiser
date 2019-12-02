@@ -40,9 +40,7 @@ def main():
     running = True
     pg.init()
     pg.display.set_mode((opts['sw'], opts['sh']))
-    plt = plot((-10, 10), (-0.5, 1.6))
-
-    plt.grid = False
+    plt = plot((-1, 1), (-1, 1))
 
     while running:
         plt.screen.fill(clrs['white'])
@@ -52,9 +50,10 @@ def main():
                 running = False
             plt.handle(event)
 
-        plt.show(x_axis=False)  # draw axis and grid
+        plt.show()  # draw axis and grid
 
-        plt.draw_pline(dfun, x=1, n = 5)
+        plt.draw_field(dfun, colour='lgrey')
+        plt.draw_case(dfun, x0=0, y0=0.5)
 
         plt.border()
         pg.display.flip()

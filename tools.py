@@ -85,7 +85,7 @@ def normalize(array):
 
 opts = Info({  # global options
     'sh' : 500, # screen height
-    'sw' : 100, # screen width
+    'sw' : 500, # screen width
     'bw' : 10,  # border width
     'aw' : 50   #  axis  width
 })

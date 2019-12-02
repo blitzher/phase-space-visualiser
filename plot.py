@@ -47,25 +47,27 @@ class plot:
 
         plot.center_text( message, position, font, colour = 'black')
         """
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour]
 
         text_size = font.size(str(msg))
         text_centered = (pos[0] - text_size[0] / 2, pos[1] - text_size[1] / 2)
         self.screen.blit(font.render(str(msg), True, colour), text_centered)
 
-    def _draw_arrow(self, start, end, colour='black', width=1, rel_spoke_len=0.2):
+    def _draw_arrow(self, start, end, colour, width=1, rel_spoke_len=0.2):
         """ internal function for drawing arrows"""
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour]
+
         strt, endp = np.array(start), np.array(end)
         diff = endp - strt
+        norm_diff = tools.norm(diff)
         perp = tools.perp(tools.normalize(diff))
 
         midpoint = strt + diff * 0.7
 
-        pnt2 = midpoint - (perp * tools.norm(diff) * rel_spoke_len)
-        pnt1 = midpoint + (perp * tools.norm(diff) * rel_spoke_len)
+        pnt2 = midpoint - (perp * norm_diff * rel_spoke_len)
+        pnt1 = midpoint + (perp * norm_diff * rel_spoke_len)
 
         #pgdraw.line(self.screen, colour, pnt1, pnt2)
 
@@ -168,7 +170,7 @@ class plot:
                 pos1, pos2 = (pos - np.array((10, 0))), (pos + np.array((10, 0)))
 
                 pgdraw.line(self.screen, clrs['black'], pos1, pos2)
-                self.center_text(y, pos + np.array((15, -15)), self.axis_font)
+                self.center_text(y, pos + np.array((10, -10)), self.axis_font)
 
     def draw_grid(self):
         """ draw a grid at each integer x and y value """
@@ -188,7 +190,7 @@ class plot:
         plot.draw_case( y'(x, y), x0 = 0, y0 = 0, n = 20, colour = 'red' ) -> None
         """
 
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour] # see if passed colour is in clrs
 
         def case(x, x0, y0): # generate an approximating function
@@ -224,7 +226,7 @@ class plot:
 
         plot.draw_func( f(x), n = 20, colour = 'blue' ) -> None
         """
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour]
 
         line = [self.to_screen(x, fun(x)) for x in np.linspace(self.lo_x, self.hi_x, num=n)]
@@ -238,7 +240,7 @@ class plot:
         plot.draw_field( y'(x,y), n = 20, colour = 'black' ) -> None
         """
 
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour]
 
         vector_length = min(opts.sw, opts.sh) / (2*n)
@@ -251,13 +253,13 @@ class plot:
                 start_point = self.to_screen(x, y) - slope_vector * vector_length / 2
                 end_point = self.to_screen(x, y) + slope_vector * vector_length / 2
 
-                self._draw_arrow(start_point, end_point)
+                self._draw_arrow(start_point, end_point, colour)
                 #pgdraw.line(self.screen, colour, start_point, end_point)
 
     def draw_pline(self, df, x=0, n=20, colour='black'):
         """ draws the phaseline """
 
-        if colour in clrs.info:
+        if str(colour) in clrs.info:
             colour = clrs[colour]
 
         vector_length = max(opts.sw, opts.sh) / (2*n)
@@ -266,9 +268,9 @@ class plot:
         for y in np.linspace(self.lo_y, self.hi_y, num=n):
             strt = (0, y)
 
-            if abs(df(x,y)) < 0.05:
+            if abs(df(x, y)) < 0.05:
                 continue
-            elif df(x,y) > 0:
+            elif df(x, y) > 0:
                 head = np.array((0, 1))
             else:
                 head = np.array((0, -1))
@@ -281,7 +283,7 @@ class plot:
 
             #pgdraw.circle(self.screen, colour, strt, 10)
             #pgdraw.line(self.screen, colour, strt, head)
-            self._draw_arrow(screen_strt, screen_endp, width=1, rel_spoke_len=0.5)
+            self._draw_arrow(screen_strt, screen_endp, colour, width=1, rel_spoke_len=0.5)
 
     def border(self, w=opts.bw, clr1='beige', clr2='dgrey'):
         """ draw the border of the window
@@ -354,9 +356,6 @@ class plot:
             self.draw_grid()
         if self.axis:
             self.draw_axis(draw_x=x_axis, draw_y=y_axis)
-
-        pgdraw.circle(self.screen, (160,82,45), self.to_screen(0, 0), 10)
-        pgdraw.circle(self.screen, (160,82,45), self.to_screen(0, 1), 10)
 
     def save(self, filename='plot.png'):
         """ save an image of the plot using pygame.image.save
