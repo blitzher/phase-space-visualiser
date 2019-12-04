@@ -55,7 +55,17 @@ class plot:
         self.screen.blit(font.render(str(msg), True, colour), text_centered)
 
     def _draw_arrow(self, start, end, colour, width=1, rel_spoke_len=0.2):
-        """ internal function for drawing arrows"""
+        """ internal function for drawing arrows
+        draws directly to screen coordiantes,
+        so make sure start and end have been converted
+
+        plot._draw_arrow( start: np.array, end: np.array, colour: rgb or name
+                width=1: int, rel_spoke_len=0.2: float)
+
+        rel_spoke_len is the length of the spokes relative
+                        to the length of the line from
+                        start to end
+        """
         if str(colour) in clrs.info:
             colour = clrs[colour]
 
